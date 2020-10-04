@@ -1,0 +1,45 @@
+// version = '0.1-SNAPSHOT'
+// version = new ProjectVersion(0, 2)
+version = readVersionProperties()
+
+task printVersion {
+  println version
+}
+
+ProjectVersion readVersionProperties () {
+  def versionFile = file('version.properties')
+  
+  if(!versionFile.exists()) {
+    throw new GradleException("Required version.properties file not found: $versionFile.canonicalPath")
+  }
+
+  Properties versionProperties = new Properties();
+  versionFile.withInputStream { stream ->
+    versionProperties.load(stream);
+  }
+
+  new ProjectVersion(versionProperties.major.toInteger(),
+                     versionProperties.minor.toInteger(),
+                     versionProperties.release.toBoolean())
+}
+
+class ProjectVersion {
+  private Integer major;
+  private Integer minor;
+  private Boolean release;
+
+  ProjectVersion(Integer major, Integer minor) {
+    this.major = major;
+    this.minor = minor;
+  }
+
+   ProjectVersion(Integer major, Integer minor, Boolean release) {
+    this(major, minor)
+    this.release = release
+  }
+
+  @Override 
+  String toString() {
+    return "$major.$minor${release ? "" : "-SNAPHOST"}"
+  }
+}
