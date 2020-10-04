@@ -12,13 +12,16 @@ task printVersion {
   println version
 }
 
-
 task makeReleaseVersion(
+    type: DefaultTask,
     group: 'versioning', 
     description: 'Makes project a release version.',
-    dependsOn: [printVersion]) {
-      inputs.property('release', version.release)
-      outputs.file versionFile
+    dependsOn: [loadVersionProperties]) {
+      // inputs.property('release', version.release)
+      // outputs.file versionFile
+      outputs.upToDateWhen {
+        version.release == true
+      }
       doLast {
         version.release = true
         ant.propertyfile(file: versionFile) {
