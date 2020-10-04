@@ -1,15 +1,35 @@
 // version = '0.1-SNAPSHOT'
 // version = new ProjectVersion(0, 2)
-version = readVersionProperties()
+ext {
+  versionFile= file('version.properties')
+}
+
+task loadVersionProperties {
+  version = readVersionProperties()
+}
 
 task printVersion {
   println version
 }
 
+
+task makeReleaseVersion(
+    group: 'versioning', 
+    description: 'Makes project a release version.',
+    dependsOn: [printVersion]) {
+      inputs.property('release', version.release)
+      outputs.file versionFile
+      doLast {
+        version.release = true
+        ant.propertyfile(file: versionFile) {
+          entry(key: 'release', type: 'string', operation: '=', value: 'true')
+        }
+      }
+}
+
 ProjectVersion readVersionProperties () {
-  def versionFile = file('version.properties')
-  
-  if(!versionFile.exists()) {
+
+  if(!project.versionFile.exists()) {
     throw new GradleException("Required version.properties file not found: $versionFile.canonicalPath")
   }
 
